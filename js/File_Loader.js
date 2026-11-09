@@ -1,4 +1,5 @@
 // File_loader.js
+import { assetUrl } from './Host.js';
 
 // load depth file
 export async function loadDepthSurface(bathymetryContent, calc_constants) {
@@ -782,7 +783,7 @@ function calculateActualImageCorners(lat_LL, lon_LL, lat_UR, lon_UR, zoomLevel, 
 
 // Function to load an image from the server as ImageBitmap
 export async function loadImageBitmap(imageUrl) {
-    const response = await fetch(imageUrl);
+    const response = await fetch(assetUrl(imageUrl));
     if (!response.ok) {
         throw new Error(`Failed to load image: ${response.statusText}`);
     }
@@ -810,7 +811,7 @@ export async function loadCubeBitmaps() {
     const entries = Object.entries(urls);
     const bitmaps = await Promise.all(entries.map(async ([key, url]) => {
       const img = new Image();
-      img.src = url;
+      img.src = assetUrl(url);
       await img.decode();                // wait until it’s fully downloaded
       return [key, await createImageBitmap(img)];
     }));

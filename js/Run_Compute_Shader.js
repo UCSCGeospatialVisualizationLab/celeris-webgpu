@@ -1,4 +1,5 @@
 // Run_Compute_Shader.js
+import { assetUrl } from './Host.js';
 
 export function runComputeShader(device, uniformBuffer, uniforms, computePipeline, computeBindGroup, dispatchX, dispatchY) {
 
@@ -29,7 +30,7 @@ export function runComputeShader(device, uniformBuffer, uniforms, computePipelin
 // This asynchronous function will retrieve the shader source code as text.
 export async function fetchShader(url) {
     // Use the Fetch API to get the resource at the specified URL.
-    const response = await fetch(url);
+    const response = await fetch(assetUrl(url));
 
     // Once we get the response, retrieve the text from it.
     return await response.text();

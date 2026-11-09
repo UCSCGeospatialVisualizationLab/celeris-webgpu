@@ -1,4 +1,5 @@
 // Handler_Render.js
+import { assetUrl } from './Host.js';
 
 export function createRenderBindGroupLayout(device) {
     return device.createBindGroupLayout({
@@ -386,6 +387,6 @@ export function loadImage(url) {
         const img = new Image();
         img.onload = () => resolve(img);
         img.onerror = (e) => reject(e);
-        img.src = url;
+        img.src = assetUrl(url);
     });
 }

@@ -1,10 +1,11 @@
 import { mat4 } from 'https://cdn.jsdelivr.net/npm/gl-matrix/esm/index.js';
+import { assetUrl } from './Host.js';
 
 async function loadModelDefinitions(source) {
     let config;
     if (typeof source === 'string') {
       // treat as URL
-      const res = await fetch(source);
+      const res = await fetch(assetUrl(source));
       if (!res.ok) throw new Error(`Failed to load ${source}: ${res.status}`);
       config = await res.json();
     } else if (source instanceof File || source instanceof Blob) {
