@@ -3812,10 +3812,16 @@ async function initializeWebGPUApp(configContent, bathymetryContent, waveContent
             
         }
         
-        requestAnimationFrame(frame);  // Call the next frame, restarts the function
+        // Host hook: an embedding page that drives frames itself calls window.celerisHost.frame().
+        if (!window.celerisHost?.drivesFrames) {
+            requestAnimationFrame(frame);  // Call the next frame, restarts the function
+        }
 
     }
 
+    if (window.celerisHost) {
+        window.celerisHost.frame = frame;
+    }
     // Invoke the `frame` function once to start the main loop.
     await frame();
 }
