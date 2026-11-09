@@ -3830,7 +3830,12 @@ async function initializeWebGPUApp(configContent, bathymetryContent, waveContent
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 // All the functions below this are for web page UI - this is also where the wave simulation is started
-document.addEventListener('DOMContentLoaded', function () {
+// Host hook: when this module is loaded after the page's DOMContentLoaded has already fired (an
+// embedding page importing it late), run the setup below once the module has finished evaluating.
+const whenDomReady = (setup) => document.readyState === 'loading'
+    ? document.addEventListener('DOMContentLoaded', setup)
+    : setTimeout(setup, 0);
+whenDomReady(function () {
     // Get a reference to your canvas element.
     var canvas = document.getElementById('webgpuCanvas');
 
