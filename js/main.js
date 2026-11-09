@@ -152,8 +152,10 @@ function resolveAgentCaseFileUrl(caseUrl, fileUrl) {
 
 async function loadAgentCaseFromUrl() {
     const params = new URLSearchParams(window.location.search);
-    const caseUrl = params.get("agent_case");
-    const autostart = params.get("autostart") === "1" || params.get("autostart") === "true";
+    // Host hook: an embedding page can name the case manifest directly instead of through the URL.
+    const hostCaseUrl = window.celerisHost?.caseUrl;
+    const caseUrl = hostCaseUrl ?? params.get("agent_case");
+    const autostart = hostCaseUrl != null || params.get("autostart") === "1" || params.get("autostart") === "true";
     if (!caseUrl || !autostart) {
         return false;
     }
@@ -262,6 +264,8 @@ async function initializeWebGPUApp(configContent, bathymetryContent, waveContent
         forceFallbackAdapter: false,
     });
     console.log("GPU Device acquired, starting resource creation...");
+    // Host hook: an embedding page can share this GPUDevice (e.g. with its own renderer).
+    await window.celerisHost?.onDevice?.(device, adapter);
 
     // Handle device lost and uncaptured error events
     device.lost.then((info) => {
@@ -2209,6 +2213,8 @@ async function initializeWebGPUApp(configContent, bathymetryContent, waveContent
     }
     // Added by Codex: End nested-grid boundary time-series output runtime.
 
+    // Host hook: all textures and pipelines exist; the embedding page can bind to the simulation state.
+    await window.celerisHost?.onReady?.({ device, calc_constants, txNewState, txBottom });
     console.log("Compute / Render loop starting.");
     // This function, `frame`, serves as the main loop of the application,
     // executing repeatedly to update simulation state and render the results.
@@ -3002,6 +3008,10 @@ async function initializeWebGPUApp(configContent, bathymetryContent, waveContent
         // CODEX: Upload linear-structure preview state just before the render uniform buffer is written.
         updateRenderLinearStructurePreviewUniforms();
 
+        // Host hook: an embedding page that draws the frame itself replaces the built-in render pass.
+        if (window.celerisHost?.renderFrame) {
+            await window.celerisHost.renderFrame({ total_time });
+        } else {
         // make sure depthTexture matches the current canvas / window size
         const colorTexture = context.getCurrentTexture();
         // (Re)create depth texture if size changed
@@ -3462,6 +3472,7 @@ async function initializeWebGPUApp(configContent, bathymetryContent, waveContent
 
         // Submit the recorded commands to the GPU for execution.
         device.queue.submit([commandEncoder.finish()]);
+        } // Host hook: end of built-in render pass
         // end screen render    
 
         // for the tooltip & time series, extract pixel values
